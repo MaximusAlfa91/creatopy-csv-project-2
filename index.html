@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Subir imágenes y descargar CSV</title>
+  <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+</head>
+<body>
+  <h1>Sube tus imágenes</h1>
+  <input type="hidden" role="uploadcare-uploader" data-multiple="true" id="uploader" />
+  <button onclick="descargarCSV()">📥 Descargar CSV</button>
+
+  <script>
+    // ⚠️ Reemplaza con tu propia public key de Uploadcare si ya tenés cuenta
+    UPLOADCARE_PUBLIC_KEY = 'demopublickey';
+
+    function descargarCSV() {
+      const widget = uploadcare.Widget('[role=uploadcare-uploader]');
+      const files = widget.value();
+      if (!files || files.length === 0) {
+        alert("Primero subí al menos una imagen.");
+        return;
+      }
+
+      // Si es una imagen sola (no array), convertirla a array
+      const urls = Array.isArray(files) ? files : [files];
+
+      let csv = 'image\n';
+      urls.forEach(url => {
+        csv += url + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'imagenes.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
