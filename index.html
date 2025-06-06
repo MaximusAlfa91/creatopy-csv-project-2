@@ -2,29 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Image Upload & CSV Export</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="styles.css" />
+  <title>Upload Images & Download CSV</title>
+  <link rel="stylesheet" href="style.css" />
   <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 </head>
 <body>
-  <div class="decorations">
-    <div class="circle top-left"></div>
-    <div class="square bottom-right"></div>
+  <div class="container">
+    <h1>📤 Upload Your Images</h1>
+    <p>Select the images you want to upload. Once ready, download the list as a CSV file.</p>
+    
+    <input type="hidden" role="uploadcare-uploader" data-multiple="true" id="uploader" />
+
+    <div class="buttons">
+      <button onclick="downloadCSV()">📥 Download CSV</button>
+      <button onclick="window.open('https://app.uploadcare.com/projects/d7638f5a88dbee59f6df/files/', '_blank')">
+        🗑️ Manage Uploaded Images
+      </button>
+    </div>
+
+    <small>Note: Only users with access to the Uploadcare dashboard can delete images manually.</small>
   </div>
 
-  <main class="container">
-    <h1>Upload Your Images</h1>
-    <input type="hidden" role="uploadcare-uploader" data-multiple="true" id="uploader" />
-    <button onclick="downloadCSV()">📥 Download CSV</button>
-  </main>
-
   <script>
-    UPLOADCARE_PUBLIC_KEY = 'demopublickey';
+    // Replace with your own Uploadcare public key if available
+    UPLOADCARE_PUBLIC_KEY = 'dd7638f5a88dbee59f6df';
 
     function downloadCSV() {
       const widget = uploadcare.Widget('[role=uploadcare-uploader]');
       const files = widget.value();
+
       if (!files || files.length === 0) {
         alert("Please upload at least one image first.");
         return;
