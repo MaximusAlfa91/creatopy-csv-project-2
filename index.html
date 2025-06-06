@@ -23,33 +23,35 @@
     <small>Note: Only users with access to the Uploadcare dashboard can delete images manually.</small>
   </div>
 
-  <script>
-    // Replace with your own Uploadcare public key if available
-    UPLOADCARE_PUBLIC_KEY = 'd7638f5a88dbee59f6df';
+ <script>
+  UPLOADCARE_PUBLIC_KEY = 'd7638f5a88dbee59f6df';
 
-    function downloadCSV() {
-      const widget = uploadcare.Widget('[role=uploadcare-uploader]');
-      const files = widget.value();
+  async function downloadCSV() {
+    const widget = uploadcare.Widget('[role=uploadcare-uploader]');
+    const files = await widget.value(); // Esperamos los archivos
 
-      if (!files || files.length === 0) {
-        alert("Please upload at least one image first.");
-        return;
-      }
-
-      const urls = Array.isArray(files) ? files : [files];
-      let csv = 'image\n';
-      urls.forEach(url => {
-        csv += url + '\n';
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'images.csv';
-      a.click();
-      URL.revokeObjectURL(url);
+    if (!files || files.length === 0) {
+      alert("Please upload at least one image first.");
+      return;
     }
-  </script>
+
+    const filesArray = Array.isArray(files) ? files : [files];
+    const urls = await Promise.all(filesArray.map(file => file.cdnUrl)); // Extraemos la URL de cada archivo
+
+    let csv = 'image\n';
+    urls.forEach(url => {
+      csv += url + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const urlBlob = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = urlBlob;
+    a.download = 'images.csv';
+    a.click();
+    URL.revokeObjectURL(urlBlob);
+  }
+</script>
+
 </body>
 </html>
