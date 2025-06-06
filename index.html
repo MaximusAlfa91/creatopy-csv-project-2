@@ -1,30 +1,36 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Subir imágenes y descargar CSV</title>
+  <title>Image Upload & CSV Export</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 </head>
 <body>
-  <h1>Sube tus imágenes</h1>
-  <input type="hidden" role="uploadcare-uploader" data-multiple="true" id="uploader" />
-  <button onclick="descargarCSV()">📥 Descargar CSV</button>
+  <div class="decorations">
+    <div class="circle top-left"></div>
+    <div class="square bottom-right"></div>
+  </div>
+
+  <main class="container">
+    <h1>Upload Your Images</h1>
+    <input type="hidden" role="uploadcare-uploader" data-multiple="true" id="uploader" />
+    <button onclick="downloadCSV()">📥 Download CSV</button>
+  </main>
 
   <script>
-    // ⚠️ Reemplaza con tu propia public key de Uploadcare si ya tenés cuenta
     UPLOADCARE_PUBLIC_KEY = 'demopublickey';
 
-    function descargarCSV() {
+    function downloadCSV() {
       const widget = uploadcare.Widget('[role=uploadcare-uploader]');
       const files = widget.value();
       if (!files || files.length === 0) {
-        alert("Primero subí al menos una imagen.");
+        alert("Please upload at least one image first.");
         return;
       }
 
-      // Si es una imagen sola (no array), convertirla a array
       const urls = Array.isArray(files) ? files : [files];
-
       let csv = 'image\n';
       urls.forEach(url => {
         csv += url + '\n';
@@ -34,7 +40,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'imagenes.csv';
+      a.download = 'images.csv';
       a.click();
       URL.revokeObjectURL(url);
     }
