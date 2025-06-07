@@ -1,69 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Upload Images & Download CSV</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Uploadcare Multi-Cuenta</title>
   <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
-    <h1>📤 Upload Your Images</h1>
-    <p>Select the images you want to upload. Once ready, download the list as a CSV file.</p>
-    
+    <h1>📤 Performance Max & Demand Gen Image Uploader Tool</h1>
+    <p>Select the Account you Want to Upload Your Images to</p>
+
+    <div id="account-buttons"></div>
+
+    <hr />
+
     <input type="hidden" role="uploadcare-uploader" data-multiple="true" id="uploader" />
 
-    <div class="buttons">
-      <button onclick="downloadCSV()">📥 Download CSV</button>
-      <button onclick="window.open('https://app.uploadcare.com/projects/d7638f5a88dbee59f6df/files/', '_blank')">
-        🗑️ Manage Uploaded Images
-      </button>
-    </div>
-
-    <small>Note: Only users with access to the Uploadcare dashboard can delete images manually.</small>
+    <br /><br />
+    <button class="download" onclick="downloadCSV()">📥 Download CSV</button>
   </div>
 
- <script>
-  UPLOADCARE_PUBLIC_KEY = 'd7638f5a88dbee59f6df';
+  <script>
+    const accounts = {
+      Account_1: 'd7638f5a88dbee59f6df',
+      Account_2: '0c66cc01e66de4ec45ad',
+      Account_3: '0cd1cb40ac781484a4ce',
+      Account_4: '6e4c476a4ce09f440217',
+      Account_5: '3124b74564244bcc9612'
+    };
 
-  async function downloadCSV() {
-    const widget = uploadcare.Widget('[role=uploadcare-uploader]');
-    const result = await widget.value(); // Esto puede ser un solo archivo o un grupo
+    let currentAccount = null;
 
-    let allUrls = [];
+    function renderButtons() {
+      const container = document.getElementById('account-buttons');
+      container.innerHTML = '';
 
-    // Si es un grupo
-    if (result && typeof result.files === 'function') {
-      const groupFiles = await result.files(); // Devuelve promesas
-      for (const filePromise of groupFiles) {
-        const file = await filePromise.promise(); // Esperamos la resolución del archivo
-        allUrls.push(file.cdnUrl); // URL individual
-      }
-    } else {
-      // Es uno o varios archivos individuales
-      const filesArray = Array.isArray(result) ? result : [result];
-      for (const filePromise of filesArray) {
-        const file = await filePromise.promise();
-        allUrls.push(file.cdnUrl);
-      }
+      Object.keys(accounts).forEach(accountName => {
+        const btn = document.createElement('button');
+        btn.textContent = accountName;
+        btn.className = 'account-button';
+        if (currentAccount === accountName) {
+          btn.classList.add('active');
+        }
+        btn.onclick = () => setAccount(accountName);
+        container.appendChild(btn);
+      });
     }
 
-    // Crear CSV
-    let csv = 'image\n';
-    allUrls.forEach(url => {
-      csv += url + '\n';
-    });
+    function setAccount(accountName) {
+      UPLOADCARE_PUBLIC_KEY = accounts[accountName];
+      currentAccount = accountName;
+      renderButtons();
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const urlBlob = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = urlBlob;
-    a.download = 'images.csv';
-    a.click();
-    URL.revokeObjectURL(urlBlob);
-  }
+      const uploaderInput = document.getElementById('uploader');
+      uploadcare.destroyAll();
+      uploadcare.Widget(uploaderInput);
 
-</script>
+      console.log(`✅ Cuenta activa: ${accountName} (${UPLOADCARE_PUBLIC_KEY})`);
+    }
 
+    async function downloadCSV() {
+      const widget = uploadcare.Widget('[role=uploadcare-uploader]');
+      const result = await widget.value();
+
+      let allUrls = [];
+
+      if (result && typeof result.files === 'function') {
+        const groupFiles = await result.files();
+        for (const filePromise of groupFiles) {
+          const file = await filePromise.promise();
+          allUrls.push(file.cdnUrl);
+        }
+      } else {
+        const filesArray = Array.isArray(result) ? result : [result];
+        for (const filePromise of filesArray) {
+          const file = await filePromise.promise();
+          allUrls.push(file.cdnUrl);
+        }
+      }
+
+      let csv = 'image\n';
+      allUrls.forEach(url => {
+        csv += url + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const urlBlob = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = urlBlob;
+      a.download = 'images.csv';
+      a.click();
+      URL.revokeObjectURL(urlBlob);
+    }
+
+    window.onload = () => {
+      const firstAccount = Object.keys(accounts)[0];
+      setAccount(firstAccount);
+    };
+  </script>
 </body>
 </html>
